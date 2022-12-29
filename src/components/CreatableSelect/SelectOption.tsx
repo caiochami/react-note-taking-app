@@ -1,6 +1,7 @@
 import { classNames } from "../../utilities/helpers";
 import { SelectOption } from "./Select";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { ReactNode } from "react";
 
 type SelectOptionProps = {
   isSelected?: Boolean;
@@ -8,6 +9,7 @@ type SelectOptionProps = {
   onClick: (value: SelectOption) => void;
   option: SelectOption;
   onMouseEnter: () => void;
+  innerRef?: any;
 };
 
 export function SelectOption({
@@ -16,9 +18,11 @@ export function SelectOption({
   onClick,
   onMouseEnter,
   option,
+  innerRef,
 }: SelectOptionProps) {
   return (
     <div
+      ref={innerRef}
       onMouseEnter={onMouseEnter}
       className={classNames(
         "flex cursor-pointer items-center gap-2 rounded-md p-1 text-xs",

@@ -22,10 +22,25 @@ export function NoteForm() {
       label: "Tag Four",
       value: "Tag Four",
     },
-
     {
       label: "Tag Five",
       value: "Tag Five",
+    },
+    {
+      label: "Tag Six",
+      value: "Tag Six",
+    },
+    {
+      label: "Tag Seven",
+      value: "Tag Seven",
+    },
+    {
+      label: "Tag Eight",
+      value: "Tag Eight",
+    },
+    {
+      label: "Tag Nine",
+      value: "Tag Nine",
     },
   ]);
 

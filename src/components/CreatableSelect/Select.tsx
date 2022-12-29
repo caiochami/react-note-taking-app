@@ -1,5 +1,6 @@
 import { Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
+import { SelectedOption } from "./SelectedOption";
 import { SelectOption } from "./SelectOption";
 
 export type SelectOption = {
@@ -35,13 +36,15 @@ export function Select({
 }: SelectProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
 
+  const optionRefs = useRef<any[]>([]);
+
   const [search, setSearch] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const inputEl = useRef<HTMLInputElement>(null);
 
-  const dropdownEl = useRef<HTMLDivElement>(null);
+  const containerEl = useRef<HTMLDivElement>(null);
 
   const filteredOptions =
     search.length === 0
@@ -102,13 +105,7 @@ export function Select({
   };
 
   const isOptionSelected = (selectOption: SelectOption): boolean => {
-    if (!multiple) {
-      return value === selectOption;
-    }
-
-    console.log("includes", value.includes(selectOption));
-
-    return value.includes(selectOption);
+    return !multiple ? value === selectOption : value.includes(selectOption);
   };
 
   const toggleOption = (option: SelectOption): void => {
@@ -127,9 +124,7 @@ export function Select({
   };
 
   useEffect(() => {
-    const inputHandler = (event: KeyboardEvent): void => {
-      event.stopPropagation();
-
+    const handler = (event: KeyboardEvent): void => {
       if (!isOpen) {
         setIsOpen(true);
       }
@@ -143,7 +138,7 @@ export function Select({
           }
           break;
         case "Enter":
-          if (search.length > 0 && filteredOptions.length === 0) {
+          if (multiple && search.length > 0 && filteredOptions.length === 0) {
             createTag();
           } else {
             toggleOption(filteredOptions[highlightedIndex]);
@@ -180,17 +175,15 @@ export function Select({
       }
     };
 
-    inputEl.current?.addEventListener("keydown", inputHandler);
+    containerEl.current?.addEventListener("keydown", handler);
 
-    return () => inputEl.current?.removeEventListener("keydown", inputHandler);
+    return () => containerEl.current?.removeEventListener("keydown", handler);
   });
 
   useEffect(() => {
     const closeDropdown = (event: any) => {
-      if (
-        event.path.includes(inputEl.current) ||
-        event.path.includes(dropdownEl.current)
-      ) {
+      console.log("click");
+      if (event.path.includes(containerEl.current)) {
         return;
       }
 
@@ -215,7 +208,23 @@ export function Select({
   }, [search]);
 
   useEffect(() => {
+    const element = optionRefs.current[highlightedIndex];
+
+    if (!element) {
+      return;
+    }
+
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
+  }, [highlightedIndex]);
+
+  useEffect(() => {
     if (isOpen) {
+      inputEl.current?.focus();
+
       setHighlightedIndex(0);
     }
   }, [isOpen]);
@@ -225,33 +234,36 @@ export function Select({
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
-      <div className="relative mt-1 text-left">
-        <div
-          onClick={() => setIsOpen(true)}
-          className="flex flex-wrap gap-2 rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm"
-        >
+      <div
+        className="relative mt-1 text-left outline-none"
+        ref={containerEl}
+        tabIndex={0}
+        onClick={() => setIsOpen(true)}
+      >
+        <div className="flex cursor-pointer flex-wrap gap-2 rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm">
           {multiple
             ? value.map((selectedOption: SelectOption) => (
-                <div
-                  className="cursor-pointer rounded-md bg-gray-100 p-2 text-xs text-gray-600 transition delay-150 ease-in-out hover:bg-gray-100"
+                <SelectedOption
                   key={selectedOption.value}
                   onClick={() => clearOption(selectedOption)}
-                >
-                  {selectedOption.label}
-                </div>
+                  selectOption={selectedOption}
+                />
               ))
-            : value?.label}
+            : value && (
+                <SelectedOption
+                  onClick={() => clearOption(value)}
+                  selectOption={value}
+                />
+              )}
 
-          {multiple && (
-            <input
-              ref={inputEl}
-              type="text"
-              name={name}
-              onChange={(event) => setSearch(event.target.value)}
-              id={name}
-              className="block px-2 py-1 outline-none sm:text-sm"
-            />
-          )}
+          <input
+            ref={inputEl}
+            type="text"
+            name={name}
+            onChange={(event) => setSearch(event.target.value)}
+            id={name}
+            className="block px-2 py-1 outline-none sm:text-sm"
+          />
         </div>
         <Transition
           as={Fragment}
@@ -264,10 +276,9 @@ export function Select({
           leaveTo="transform opacity-0 scale-95"
         >
           <div
-            className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            className="absolute right-0 z-10 mt-2 max-h-32 w-56 origin-top-right divide-y divide-gray-100 overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
             role="menu"
             aria-orientation="vertical"
-            ref={dropdownEl}
           >
             {filteredOptions.length ? (
               filteredOptions.map((option: SelectOption, index: number) => (
@@ -278,6 +289,7 @@ export function Select({
                   onClick={() => toggleOption(option)}
                   key={index}
                   option={option}
+                  innerRef={(el: any) => (optionRefs.current[index] = el)}
                 />
               ))
             ) : (
