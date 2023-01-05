@@ -1,14 +1,20 @@
+import { RefObject } from "react";
+
 type InputProps = {
   name: string;
   type?: string;
   placeholder: string;
   label: string;
+  required?: boolean;
+  innerRef?: RefObject<HTMLInputElement>;
 };
 export function Input({
   name,
   label = "Label",
   type = "text",
   placeholder = "Type something...",
+  required = false,
+  innerRef,
 }: InputProps) {
   return (
     <div>
@@ -17,6 +23,8 @@ export function Input({
       </label>
       <div className="mt-1">
         <input
+          ref={innerRef}
+          required={required}
           type={type}
           name={name}
           id={name}

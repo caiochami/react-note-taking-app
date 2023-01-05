@@ -1,10 +1,15 @@
-import { useState } from "react";
-import { Form } from "react-router-dom";
+import { FormEvent, useRef, useState } from "react";
 import { Input } from "./Input";
 import { Select, SelectOption } from "./CreatableSelect/Select";
 import { Textarea } from "./Textarea";
+import { Button } from "./Button";
+import { NoteData } from "./CreateNote";
 
-export function NoteForm() {
+type NoteFormProps = {
+  onSubmit: (data: NoteData) => void;
+};
+
+export function NoteForm({ onSubmit }: NoteFormProps) {
   const [options, setOptions] = useState<SelectOption[]>([
     {
       label: "Tag One",
@@ -44,54 +49,65 @@ export function NoteForm() {
     },
   ]);
 
-  const [singleSelectValue, setSingleSelectValue] = useState<
-    SelectOption | undefined
-  >(options[0]);
+  const titleRef = useRef<HTMLInputElement>(null);
 
-  const handleSingleSelectChange = (value: SelectOption | undefined): void => {
-    console.log(value);
-
-    setSingleSelectValue(value);
-  };
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [multipleSelectValue, setMultipleSelectValue] = useState<
     SelectOption[]
   >([]);
 
-  const handleMultipleSelectChange = (value: SelectOption[]): void => {
-    console.log(value);
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
 
-    setMultipleSelectValue(value);
+    onSubmit({
+      title: titleRef.current!.value,
+      markdown: textareaRef.current!.value,
+      tags: multipleSelectValue,
+    });
   };
 
   return (
-    <Form>
+    <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div>
-          <Input name="title" label="Title" placeholder="Title" />
+          <Input
+            innerRef={titleRef}
+            required
+            name="title"
+            label="Title"
+            placeholder="Title"
+          />
         </div>
         <div>
-          <Select
-            label="Tags"
-            name="tags"
-            options={options}
-            onChange={handleSingleSelectChange}
-            value={singleSelectValue}
-          />
-
           <Select
             label="Tags"
             name="tags"
             multiple
             options={options}
-            onChange={handleMultipleSelectChange}
+            onChange={(value: SelectOption[]): void =>
+              setMultipleSelectValue(value)
+            }
             value={multipleSelectValue}
           />
         </div>
         <div className="sm:col-span-2">
-          <Textarea name="body" label="Body" placeholder="Body" />
+          <Textarea
+            innerRef={textareaRef}
+            name="body"
+            label="Body"
+            placeholder="Body"
+          />
+        </div>
+        <div className="flex justify-end gap-2 border-t pt-2 sm:col-span-2">
+          <Button size="xs" color="default">
+            Cancel
+          </Button>
+          <Button size="xs" type="submit" color="primary">
+            Save
+          </Button>
         </div>
       </div>
-    </Form>
+    </form>
   );
 }

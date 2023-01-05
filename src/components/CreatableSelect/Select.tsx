@@ -182,7 +182,6 @@ export function Select({
 
   useEffect(() => {
     const closeDropdown = (event: any) => {
-      console.log("click");
       if (event.path.includes(containerEl.current)) {
         return;
       }
@@ -262,7 +261,7 @@ export function Select({
             name={name}
             onChange={(event) => setSearch(event.target.value)}
             id={name}
-            className="block px-2 py-1 outline-none sm:text-sm"
+            className="block w-16 px-2 py-1 outline-none sm:text-sm"
           />
         </div>
         <Transition

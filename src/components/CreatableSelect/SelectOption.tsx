@@ -1,7 +1,6 @@
 import { classNames } from "../../utilities/helpers";
 import { SelectOption } from "./Select";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { ReactNode } from "react";
 
 type SelectOptionProps = {
   isSelected?: Boolean;
