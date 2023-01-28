@@ -1,9 +1,10 @@
 import { Transition } from "@headlessui/react";
-import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { SelectedOption } from "./SelectedOption";
 import { SelectOption } from "./SelectOption";
 
 export type SelectOption = {
+  id: string;
   label: string;
   value: any;
 };
@@ -24,6 +25,7 @@ type SelectProps = {
   name: string;
   label?: string;
   options: SelectOption[];
+  onCreate: (value: SelectOption) => void;
 } & (SingleSelectProps | MultipleSelectProps);
 
 export function Select({
@@ -32,6 +34,7 @@ export function Select({
   options = [],
   value,
   onChange,
+  onCreate,
   multiple,
 }: SelectProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -91,17 +94,22 @@ export function Select({
     }
   };
 
-  const createTag = (): void => {
-    if (!multiple) {
+  const createOption = (): void => {
+    if (!multiple || !search.length) {
       return;
     }
 
-    selectOption({
+    const newOption = {
+      id: crypto.randomUUID(),
       label: search,
       value: search,
-    });
+    };
+
+    selectOption(newOption);
 
     clearSearch();
+
+    onCreate(newOption);
   };
 
   const isOptionSelected = (selectOption: SelectOption): boolean => {
@@ -138,9 +146,14 @@ export function Select({
           }
           break;
         case "Enter":
-          if (multiple && search.length > 0 && filteredOptions.length === 0) {
-            createTag();
+          if (!search.length) {
+            return;
+          }
+
+          if (multiple && filteredOptions.length === 0) {
+            createOption();
           } else {
+            console.log("ok");
             toggleOption(filteredOptions[highlightedIndex]);
           }
 
@@ -182,7 +195,7 @@ export function Select({
 
   useEffect(() => {
     const closeDropdown = (event: any) => {
-      if (event.path.includes(containerEl.current)) {
+      if (event.path?.includes(containerEl.current)) {
         return;
       }
 
@@ -243,7 +256,7 @@ export function Select({
           {multiple
             ? value.map((selectedOption: SelectOption) => (
                 <SelectedOption
-                  key={selectedOption.value}
+                  key={selectedOption.id}
                   onClick={() => clearOption(selectedOption)}
                   selectOption={selectedOption}
                 />
@@ -294,8 +307,9 @@ export function Select({
             ) : (
               <SelectOption
                 onMouseEnter={() => setHighlightedIndex(0)}
-                onClick={createTag}
+                onClick={createOption}
                 option={{
+                  id: "new",
                   value: search,
                   label: multiple
                     ? `Create option "${search}"`

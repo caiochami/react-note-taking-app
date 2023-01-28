@@ -3,55 +3,19 @@ import { Input } from "./Input";
 import { Select, SelectOption } from "./CreatableSelect/Select";
 import { Textarea } from "./Textarea";
 import { Button } from "./Button";
-import { NoteData } from "./CreateNote";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { NoteData } from "../utilities/types";
 
 type NoteFormProps = {
   onSubmit: (data: NoteData) => void;
 };
 
 export function NoteForm({ onSubmit }: NoteFormProps) {
-  const [options, setOptions] = useState<SelectOption[]>([
-    {
-      label: "Tag One",
-      value: "Tag One",
-    },
-    {
-      label: "Tag Two",
-      value: "Tag Two",
-    },
-    {
-      label: "Tag Three",
-      value: "Tag Three",
-    },
-    {
-      label: "Tag Four",
-      value: "Tag Four",
-    },
-    {
-      label: "Tag Five",
-      value: "Tag Five",
-    },
-    {
-      label: "Tag Six",
-      value: "Tag Six",
-    },
-    {
-      label: "Tag Seven",
-      value: "Tag Seven",
-    },
-    {
-      label: "Tag Eight",
-      value: "Tag Eight",
-    },
-    {
-      label: "Tag Nine",
-      value: "Tag Nine",
-    },
-  ]);
+  const [tags, setTags] = useLocalStorage("TAGS", []);
 
   const titleRef = useRef<HTMLInputElement>(null);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const markdownRef = useRef<HTMLTextAreaElement>(null);
 
   const [multipleSelectValue, setMultipleSelectValue] = useState<
     SelectOption[]
@@ -62,7 +26,7 @@ export function NoteForm({ onSubmit }: NoteFormProps) {
 
     onSubmit({
       title: titleRef.current!.value,
-      markdown: textareaRef.current!.value,
+      markdown: markdownRef.current!.value,
       tags: multipleSelectValue,
     });
   };
@@ -84,7 +48,8 @@ export function NoteForm({ onSubmit }: NoteFormProps) {
             label="Tags"
             name="tags"
             multiple
-            options={options}
+            options={tags}
+            onCreate={(newTag: SelectOption) => setOptions([newTag, ...tags])}
             onChange={(value: SelectOption[]): void =>
               setMultipleSelectValue(value)
             }
@@ -93,7 +58,7 @@ export function NoteForm({ onSubmit }: NoteFormProps) {
         </div>
         <div className="sm:col-span-2">
           <Textarea
-            innerRef={textareaRef}
+            innerRef={markdownRef}
             name="body"
             label="Body"
             placeholder="Body"

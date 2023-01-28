@@ -8,16 +8,21 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
-import { CreateNote } from "./components/CreateNote";
+import { Index } from "./pages/index";
+import { Create } from "./pages/create";
 
 const router = createBrowserRouter([
   {
-    path: "/",
     element: <Layout />,
     children: [
       {
+        path: "/",
+        element: <Index />,
+        index: true,
+      },
+      {
         path: "/create",
-        element: <CreateNote />,
+        element: <Create />,
       },
       {
         path: "/:id",
