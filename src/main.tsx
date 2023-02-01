@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import { Index } from "./pages/index";
 import { Create } from "./pages/create";
+import { NotesProvider } from "./context/NotesContext";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <NotesProvider>
+      <RouterProvider router={router} />
+    </NotesProvider>
   </React.StrictMode>
 );

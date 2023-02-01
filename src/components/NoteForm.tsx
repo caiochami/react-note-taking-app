@@ -49,7 +49,7 @@ export function NoteForm({ onSubmit }: NoteFormProps) {
             name="tags"
             multiple
             options={tags}
-            onCreate={(newTag: SelectOption) => setOptions([newTag, ...tags])}
+            onCreateOption={(newTag) => setTags([newTag, ...tags])}
             onChange={(value: SelectOption[]): void =>
               setMultipleSelectValue(value)
             }

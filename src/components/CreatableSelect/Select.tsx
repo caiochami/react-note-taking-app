@@ -25,7 +25,7 @@ type SelectProps = {
   name: string;
   label?: string;
   options: SelectOption[];
-  onCreate: (value: SelectOption) => void;
+  onCreateOption: (value: SelectOption) => void;
 } & (SingleSelectProps | MultipleSelectProps);
 
 export function Select({
@@ -34,7 +34,7 @@ export function Select({
   options = [],
   value,
   onChange,
-  onCreate,
+  onCreateOption,
   multiple,
 }: SelectProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -61,6 +61,8 @@ export function Select({
         });
 
   const selectOption = (option: SelectOption): void => {
+    clearSearch();
+
     if (!multiple) {
       onChange(option);
 
@@ -107,9 +109,7 @@ export function Select({
 
     selectOption(newOption);
 
-    clearSearch();
-
-    onCreate(newOption);
+    onCreateOption(newOption);
   };
 
   const isOptionSelected = (selectOption: SelectOption): boolean => {
@@ -137,6 +137,8 @@ export function Select({
         setIsOpen(true);
       }
 
+      console.log(event.key);
+
       switch (event.key) {
         case "Backspace":
           if (multiple && value.length > 0 && search.length === 0) {
@@ -153,13 +155,21 @@ export function Select({
           if (multiple && filteredOptions.length === 0) {
             createOption();
           } else {
-            console.log("ok");
             toggleOption(filteredOptions[highlightedIndex]);
           }
 
           clearSearch();
 
           break;
+        case "ArrowRight": {
+          if (multiple && filteredOptions.length === 0) {
+            return;
+          }
+
+          toggleOption(filteredOptions[highlightedIndex]);
+
+          break;
+        }
         case "ArrowUp": {
           const newIndex = highlightedIndex - 1 <= 0 ? 0 : highlightedIndex - 1;
 
@@ -288,7 +298,7 @@ export function Select({
           leaveTo="transform opacity-0 scale-95"
         >
           <div
-            className="absolute right-0 z-10 mt-2 max-h-32 w-56 origin-top-right divide-y divide-gray-100 overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            className="absolute right-0 z-10 mt-2 max-h-32 w-full origin-top-right divide-y divide-gray-100 overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
             role="menu"
             aria-orientation="vertical"
           >

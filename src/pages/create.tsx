@@ -1,6 +1,21 @@
+import { useNavigate } from "react-router-dom";
 import { NoteForm } from "../components/NoteForm";
+import { Note, NoteData } from "../utilities/types";
+import { useNotes } from "../context/NotesContext";
 
 export function Create() {
+  const { setNotes } = useNotes();
+
+  const navigate = useNavigate();
+
+  function createNote(noteData: NoteData): void {
+    setNotes((prevNotes) => [
+      ...prevNotes,
+      { ...noteData, id: crypto.randomUUID() },
+    ]);
+
+    navigate("/");
+  }
   return (
     <div className="space-y-6 sm:space-y-5">
       <div>
@@ -13,7 +28,7 @@ export function Create() {
         </p>
       </div>
 
-      <NoteForm onSubmit={(event) => console.log(event)} />
+      <NoteForm onSubmit={createNote} />
     </div>
   );
 }
